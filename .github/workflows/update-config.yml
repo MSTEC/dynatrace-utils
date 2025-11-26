@@ -1,0 +1,48 @@
+name: Run PowerShell script
+
+on: workflow_dispatch
+
+jobs:
+  run-powershell:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Check pwsh availability
+        run: pwsh -c "$PSVersionTable.PSVersion"
+
+      - name: Run PowerShell script with pwsh
+        shell: pwsh
+        run: |
+          Write-Host "Running script: ./scripts/run.ps1"
+          ./scripts/run.ps1
+
+      - name: Checkout target repo (update-config.yml)
+        uses: actions/checkout@v4
+        with:
+          repository: MSTEC/dynatrace
+          token: ${{ secrets.DEST_REPO_TOKEN }}
+          path: dest-repo
+
+
+      - name: Upload file.p7m to MSTEC/dynatrace
+        shell: bash
+        run: |
+          set -e
+          if [ ! -f ./file.p7m ]; then
+            echo "file.p7m not found in repository root; aborting"
+            exit 1
+          fi
+          cp ./file.p7m dest-repo/file.p7m
+          cd dest-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain)" ]; then
+            git add file.p7m
+            git commit -m "Update file.p7m from dynatrace-utils workflow"
+            git push origin HEAD:main
+          else
+            echo "No changes to commit"
+          fi
+
