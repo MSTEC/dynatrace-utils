@@ -11,7 +11,6 @@ jobs:
         
       - name: Run bash script 
         run: |
-          Write-Host "Running script: ./scripts/run.ps1"
           ./scripts/run.sh
 
       - name: Checkout target repo (update-config.yml)
