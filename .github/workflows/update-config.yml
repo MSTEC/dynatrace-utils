@@ -9,6 +9,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         
+      - name: Setup PowerShell 7
+        uses: actions/setup-powershell@v2
+        with:
+          # Use a specific major version or pin a minor if needed (e.g. '7.4.0')
+          version: '7'
+
       - name: Check pwsh availability
         run: pwsh -c "$PSVersionTable.PSVersion"
 
