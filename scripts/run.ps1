@@ -8,6 +8,6 @@ param(
 
 Write-Host $Message
 
-openssl smime -encrypt -in ".\..\templates\credentials\credential.yml" -aes256 -out file.p7m -outform pem ".\..\certs\prod-cac_base64.cer"
+openssl smime -encrypt -in "./templates/credentials/credential.yml" -aes256 -out file.p7m -outform pem "./certs\prod-cac_base64.cer"
 
 exit 0

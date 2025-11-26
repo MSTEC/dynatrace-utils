@@ -9,20 +9,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         
-      #- name: Setup PowerShell 7
-      #  uses: PowerShell/setup-powershell@v2
-      #  with:
-      #    # Use a specific major version or pin a minor if needed (e.g. '7.4.0')
-      #    version: '7'
-
-      #- name: Check pwsh availability
-      #  run: pwsh -c "$PSVersionTable.PSVersion"
-
-      - name: Run PowerShell script with pwsh
-        shell: pwsh
+      - name: Run bash script 
         run: |
           Write-Host "Running script: ./scripts/run.ps1"
-          ./scripts/run.ps1
+          ./scripts/run.sh
 
       - name: Checkout target repo (update-config.yml)
         uses: actions/checkout@v4
