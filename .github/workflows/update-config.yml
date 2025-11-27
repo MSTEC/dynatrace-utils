@@ -6,38 +6,41 @@ jobs:
   run-powershell:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        
-      - name: Run bash script 
-        run: |
-          openssl smime -encrypt -in "${GITHUB_WORKSPACE}/templates/credentials/credential.yml" -aes256 -out "${GITHUB_WORKSPACE}/file.p7m" -outform pem "${GITHUB_WORKSPACE}/certs/prod-cac_base64.cer"
 
-      - name: Checkout target repo (update-config.yml)
+      - name: FH CLI login
+        shell: bash
+        run: |
+          gh auth login -h github.com --with-token < "${{ secrets.DEST_REPO_TOKEN }}"
+          gh auth status
+
+      - name: Checkout repository dynatrace-utils
+        uses: actions/checkout@v4
+
+      - name: Checkout repository dynatrace
         uses: actions/checkout@v4
         with:
           repository: MSTEC/dynatrace
           token: ${{ secrets.DEST_REPO_TOKEN }}
-          path: dest-repo
-
-
-      - name: Upload file.p7m to MSTEC/dynatrace
-        shell: bash
+          path: dynatrace-repo
+        
+      - name: encrypt credential file
+        working-directory: ./dynatrace-repo
         run: |
-          set -e
-          if [ ! -f ./file.p7m ]; then
-            echo "file.p7m not found in repository root; aborting"
-            exit 1
-          fi
-          cp ./file.p7m dest-repo/file.p7m
-          cd dest-repo
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          if [ -n "$(git status --porcelain)" ]; then
-            git add file.p7m
-            git commit -m "Update file.p7m from dynatrace-utils workflow"
-            git push origin HEAD:main
-          else
-            echo "No changes to commit"
-          fi
+          echo "PWD : $PWD"   # e.g /some/work/dir
+          openssl smime -encrypt -in "${GITHUB_WORKSPACE}/templates/credentials/credential.yml" -aes256 -out "${GITHUB_WORKSPACE}/dynatrace-repo/file.p7m" -outform pem "${GITHUB_WORKSPACE}/certs/prod-cac_base64.cer"
 
+      - name: copy credential file to dynatrace repo
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEST_REPO_TOKEN }}
+        working-directory: ./dynatrace-repo
+        run: |
+          echo "PWD : $PWD"   # e.g /some/work/dir
+          git config user.name "Github Actions Bot"
+          git config user.email "<none>"
+          git add file.p7m
+          git commit -m "Add encrypted credential file"
+          git push origin HEAD:main
+
+          echo $dir
+          ls
