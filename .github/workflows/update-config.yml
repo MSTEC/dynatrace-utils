@@ -1,4 +1,4 @@
-name: Run PowerShell script
+name: 
 
 on: workflow_dispatch
 
@@ -10,7 +10,7 @@ jobs:
       - name: FH CLI login
         shell: bash
         run: |
-          gh auth login -h github.com --with-token < "${{ secrets.DEST_REPO_TOKEN }}"
+          gh auth login -h github.com --with-token <<< "${{ secrets.DEST_REPO_TOKEN }}"
           gh auth status
 
       - name: Checkout repository dynatrace-utils
