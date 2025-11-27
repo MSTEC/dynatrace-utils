@@ -11,7 +11,7 @@ jobs:
         
       - name: Run bash script 
         run: |
-          ./scripts/run.sh
+          openssl smime -encrypt -in "./templates/credentials/credential.yml" -aes256 -out file.p7m -outform pem "./certs\prod-cac_base64.cer"
 
       - name: Checkout target repo (update-config.yml)
         uses: actions/checkout@v4
