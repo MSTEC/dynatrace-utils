@@ -11,7 +11,7 @@ jobs:
         
       - name: Run bash script 
         run: |
-          openssl smime -encrypt -in "./templates/credentials/credential.yml" -aes256 -out file.p7m -outform pem "./certs\prod-cac_base64.cer"
+          openssl smime -encrypt -in "${GITHUB_WORKSPACE}/templates/credentials/credential.yml" -aes256 -out "${GITHUB_WORKSPACE}/file.p7m" -outform pem "${GITHUB_WORKSPACE}/certs/prod-cac_base64.cer"
 
       - name: Checkout target repo (update-config.yml)
         uses: actions/checkout@v4
