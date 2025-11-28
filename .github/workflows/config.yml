@@ -28,7 +28,7 @@ jobs:
         run: |
           echo "PWD : $PWD"   # e.g /some/work/dir
           echo "encrypt credential"
-          openssl smime -encrypt -in "${GITHUB_WORKSPACE}/templates/credentials/credential.yml" -aes256 -out "${GITHUB_WORKSPACE}/dynatrace-repo/credentials/file.p7m" -outform pem "${GITHUB_WORKSPACE}/certs/prod-cac_base64.cer"
+          openssl smime -encrypt -in "${GITHUB_WORKSPACE}/templates/credentials/credential.yml" -aes256 -out "${GITHUB_WORKSPACE}/dynatrace-repo/credentials/file2.p7m" -outform pem "${GITHUB_WORKSPACE}/certs/prod-cac_base64.cer"
           echo "copy subcription configuration"
           cd "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" "${GITHUB_WORKSPACE}/dynatrace-repo/azure/azure_subscription.yml"
 
