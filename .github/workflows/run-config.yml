@@ -1,6 +1,23 @@
 name: run-config
 
-on: workflow_dispatch
+on: 
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: 'Target stage'
+        required: true
+        type: choice
+        options:
+          - 'pre-prod'
+          - 'prod'
+      oe:
+        description: 'OE abbrevation'
+        required: true
+        type: string
+      appId:
+        description: 'AppId of the dynatrace service principal'
+        required: true
+        type: string
 
 jobs:
   run-powershell:
@@ -26,12 +43,18 @@ jobs:
       - name: encrypt credential file
         working-directory: ./dynatrace-repo
         run: |
+          STAGE="${{ github.event.inputs.stage }}"
+          OE="${{ github.event.inputs.oe }}"
+          APPID="${{ github.event.inputs.oe }}"
+          LABEL="adp-dbx-{$OE}-{$STAGE}" 
+          CREDENTIAL="sp-adp-dbx-{$OE}-{$STAGE}-dynatrace.p7m"
+
           echo "PWD : $PWD"   # e.g /some/work/dir
           echo "encrypt credential"
           openssl smime -encrypt -in "${GITHUB_WORKSPACE}/templates/credentials/credential.yml" -aes256 -out "${GITHUB_WORKSPACE}/dynatrace-repo/credentials/file2.p7m" -outform pem "${GITHUB_WORKSPACE}/certs/prod-cac_base64.cer"
           echo "copy subcription configuration"
           
-          yq e ' (.. | select(tag == "!!str")) |= sub("<LABEL>", "label1") | (.. | select(tag == "!!str")) |= sub("<CREDENTIAL>", "meow-meow") | (.. | select(tag == "!!str")) |= sub("<APPID>", "00-000-00-0")' "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" > "${GITHUB_WORKSPACE}/templates/azure/azure_subscription_modified.yml"
+          yq e ' (.. | select(tag == "!!str")) |= sub("<LABEL>", $LABEL) | (.. | select(tag == "!!str")) |= sub("<CREDENTIAL>", $CREDENTIAL) | (.. | select(tag == "!!str")) |= sub("<APPID>", $APPID)' "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" > "${GITHUB_WORKSPACE}/templates/azure/azure_subscription_modified.yml"
           
           echo "Workspace: ${GITHUB_WORKSPACE}"
 
