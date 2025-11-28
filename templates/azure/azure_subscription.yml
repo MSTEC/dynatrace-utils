@@ -1,0 +1,131 @@
+##
+## Template for Azure Integration Profile
+##
+## See the README.md file in this folder for more information and documentation references!
+##
+
+label: <LABEL>                                       # REQUIRED               string                   Must be unique among all Azure labels in your management zone! Please do not use any hyphens!
+key: '{{ <CREDENTIAL> }}'                        # REQUIRED               credential[string]       See README.md and DT documentation for details.
+directoryId: 6e06e42d-6925-47c6-b9e7-9581c7ca302a           # REQUIRED               directoryId[string]      Also referred to as 'Tenant ID'.
+appId: <APPID>                # REQUIRED               appId[string]            Also referred to as 'Client ID'.
+autoTagging: true                                         # REQUIRED               true | false             See README.md and DT documentation for details.
+monitorOnlyTaggedEntities: false                            # REQUIRED               true | false             See README.md and DT documentation for details.
+monitorOnlyTagPairs: []                                     # REQUIRED               list[Azure tags]         See README.md and DT documentation for details.
+active: true                                                # OPTIONAL               true (default) | false   See README.md and DT documentation for details.
+supportingServices:
+- name: cloud:azure:storage:storageaccounts
+  monitoredMetrics:
+  - name: Availability
+    dimensions:
+    - Authentication
+    - GeoType
+    - ApiName
+  - name: Egress
+    dimensions:
+    - Authentication
+    - GeoType
+    - ApiName
+  - name: Ingress
+    dimensions:
+    - Authentication
+    - GeoType
+    - ApiName
+  - name: SuccessE2ELatency
+    dimensions:
+    - Authentication
+    - GeoType
+    - ApiName
+  - name: Transactions
+    dimensions:
+    - Authentication
+    - GeoType
+    - ResponseType
+    - ApiName
+    - TransactionType
+  - name: UsedCapacity
+    dimensions: []
+- name: cloud:azure:storage:storageaccounts:blob
+  monitoredMetrics:
+  - name: Availability
+    dimensions:
+    - Authentication
+    - GeoType
+    - ApiName
+  - name: BlobCapacity
+    dimensions:
+    - BlobType
+    - Tier
+  - name: BlobCount
+    dimensions:
+    - BlobType
+    - Tier
+  - name: ContainerCount
+    dimensions: []
+  - name: Egress
+    dimensions:
+    - Authentication
+    - GeoType
+    - ApiName
+  - name: Ingress
+    dimensions:
+    - Authentication
+    - GeoType
+    - ApiName
+  - name: SuccessE2ELatency
+    dimensions:
+    - Authentication
+    - GeoType
+    - ApiName
+  - name: Transactions
+    dimensions:
+    - Authentication
+    - GeoType
+    - ResponseType
+    - ApiName
+    - TransactionType
+- name: cloud:azure:keyvault:vaults
+  monitoredMetrics:
+  - name: Availability
+    dimensions:
+    - ActivityType
+    - ActivityName
+  - name: ServiceApiHit
+    dimensions: []
+  - name: ServiceApiLatency
+    dimensions:
+    - ActivityType
+    - ActivityName
+  - name: ServiceApiResult
+    dimensions:
+    - ActivityType
+    - ActivityName
+  - name: SaturationShoebox
+    dimensions:
+    - ActivityType
+    - ActivityName
+- name: cloud:azure:network:networkinterfaces
+  monitoredMetrics:
+  - name: BytesSentRate
+    dimensions: []
+  - name: BytesReceivedRate
+    dimensions: []
+  - name: PacketsSentRate
+    dimensions: []
+  - name: PacketsReceivedRate
+    dimensions: []
+- name: cloud:azure:classic_virtual_machine
+  monitoredMetrics:
+  - name: Percentage CPU
+    dimensions: []
+  - name: Disk Read Bytes/Sec
+    dimensions: []
+  - name: Network In
+    dimensions: []
+  - name: Network Out
+    dimensions: []
+  - name: Disk Write Bytes/Sec
+    dimensions: []
+  - name: Disk Read Operations/Sec
+    dimensions: []
+  - name: Disk Write Operations/Sec
+    dimensions: []

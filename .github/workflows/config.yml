@@ -30,8 +30,9 @@ jobs:
           echo "encrypt credential"
           openssl smime -encrypt -in "${GITHUB_WORKSPACE}/templates/credentials/credential.yml" -aes256 -out "${GITHUB_WORKSPACE}/dynatrace-repo/credentials/file.p7m" -outform pem "${GITHUB_WORKSPACE}/certs/prod-cac_base64.cer"
           echo "copy subcription configuration"
-          cd "${GITHUB_WORKSPACE}/templates/azure/subscription.yml" "${GITHUB_WORKSPACE}/dynatrace-repo/azure/subscription.yml"
+          cd "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" "${GITHUB_WORKSPACE}/dynatrace-repo/azure/azure_subscription.yml"
 
+          yq e ' (.. | select(tag == "!!str")) |= sub("<LABEL>", "label1") | (.. | select(tag == "!!str")) |= sub("<CREDENTIAL>", "meow-meow") | (.. | select(tag == "!!str")) |= sub("<APPID>", "00-000-00-0")' "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" > "${GITHUB_WORKSPACE}/dynatrace-repo/azure/azure_subscription.yml"
       - name: copy credential file to dynatrace repo
         shell: bash
         env:
@@ -42,7 +43,7 @@ jobs:
           git config user.name "Github Actions Bot"
           git config user.email "<none>"
           git add ./credentials/file.p7m
-          git add ./azure/subscription.yml
+          git add ./azure/azure_subscription.yml
           git commit -m "Add encrypted credential file"
           git push origin HEAD:main
 
