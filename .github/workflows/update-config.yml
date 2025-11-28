@@ -27,7 +27,10 @@ jobs:
         working-directory: ./dynatrace-repo
         run: |
           echo "PWD : $PWD"   # e.g /some/work/dir
-          openssl smime -encrypt -in "${GITHUB_WORKSPACE}/templates/credentials/credential.yml" -aes256 -out "${GITHUB_WORKSPACE}/dynatrace-repo/file.p7m" -outform pem "${GITHUB_WORKSPACE}/certs/prod-cac_base64.cer"
+          echo "encrypt credential"
+          openssl smime -encrypt -in "${GITHUB_WORKSPACE}/templates/credentials/credential.yml" -aes256 -out "${GITHUB_WORKSPACE}/dynatrace-repo/credentials/file.p7m" -outform pem "${GITHUB_WORKSPACE}/certs/prod-cac_base64.cer"
+          echo "copy subcription configuration"
+          cd "${GITHUB_WORKSPACE}/templates/azure/subscription.yml" "${GITHUB_WORKSPACE}/dynatrace-repo/azure/subscription.yml"
 
       - name: copy credential file to dynatrace repo
         shell: bash
@@ -38,7 +41,8 @@ jobs:
           echo "PWD : $PWD"   # e.g /some/work/dir
           git config user.name "Github Actions Bot"
           git config user.email "<none>"
-          git add file.p7m
+          git add ./credentials/file.p7m
+          git add ./azure/subscription.yml
           git commit -m "Add encrypted credential file"
           git push origin HEAD:main
 
