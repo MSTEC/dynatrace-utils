@@ -70,9 +70,8 @@ jobs:
           echo "copy subcription configuration"
           
           # Replace placeholders with variables
-          yq -h
-          yq e '.label |= sub("<LABEL>"; env(LABEL)) | .key |= sub("<CREDENTIAL>"; env(CREDENTIAL)) | .appId |= sub("<APPID>"; env(APPID))' "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" 
-          #> "${GITHUB_WORKSPACE}/templates/azure/azure_subscription_modified.yml"
+          echo "${yq -h}
+          yq e '.label |= sub("<LABEL>"; env(LABEL)) | .key |= sub("<CREDENTIAL>"; env(CREDENTIAL)) | .appId |= sub("<APPID>"; env(APPID))' "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" > "${GITHUB_WORKSPACE}/templates/azure/azure_subscription_modified.yml"
           
           cat "${GITHUB_WORKSPACE}/templates/azure/azure_subscription_modified.yml"
 
