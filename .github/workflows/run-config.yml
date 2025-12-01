@@ -55,8 +55,8 @@ jobs:
           echo "copy subcription configuration"
           
           jq --arg LABEL "$LABEL" \
-            CREDENTIAL "$CREDENTIAL" \
-            APPID "$APPID" \
+            --arg CREDENTIAL "$CREDENTIAL" \
+            --arg APPID "$APPID" \
             e ' (.. | select(tag == "!!str")) |= sub("<LABEL>", $LABEL) | (.. | select(tag == "!!str")) |= sub("<CREDENTIAL>", $CREDENTIAL) | (.. | select(tag == "!!str")) |= sub("<APPID>", $APPID)' "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" > "${GITHUB_WORKSPACE}/templates/azure/azure_subscription_modified.yml"
           
           echo "Workspace: ${GITHUB_WORKSPACE}"
