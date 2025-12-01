@@ -45,17 +45,19 @@ jobs:
         run: |
           export STAGE="${{ github.event.inputs.stage }}"
           export OE="${{ github.event.inputs.oe }}"
-          export APPID="${{ github.event.inputs.oe }}"
+          export APPID="${{ github.event.inputs.appId }}"
           export LABEL="adp-dbx-${OE}-${STAGE}" 
           export CREDENTIAL="sp-adp-dbx-${OE}-${STAGE}-dynatrace.p7m"
 
           echo "label: $LABEL"
+          echo "APPID: $APPID"
+          echo "CREDENTIAL: $CREDENTIAL"
           echo "PWD : $PWD"   
           echo "encrypt credential"
           openssl smime -encrypt -in "${GITHUB_WORKSPACE}/templates/credentials/credential.yml" -aes256 -out "${GITHUB_WORKSPACE}/dynatrace-repo/credentials/file2.p7m" -outform pem "${GITHUB_WORKSPACE}/certs/prod-cac_base64.cer"
           echo "copy subcription configuration"
           
-          yq e '.label |= sub("<LABEL>"; env(LABEL)) | .key |= sub("<CREDENTIAL>"; env(CREDENTIAL)) | .APPID |= sub("<APPID>"; env(APPID)) ' "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" > "${GITHUB_WORKSPACE}/templates/azure/azure_subscription_modified.yml"
+          yq e '.label |= sub("<LABEL>"; env(LABEL)) | .key |= sub("<CREDENTIAL>"; env(CREDENTIAL)) ' "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" > "${GITHUB_WORKSPACE}/templates/azure/azure_subscription_modified.yml"
           
             #--arg CREDENTIAL '$CREDENTIAL' \
             #--arg APPID '$APPID' \ 
