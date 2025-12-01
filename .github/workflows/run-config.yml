@@ -43,9 +43,9 @@ jobs:
       - name: encrypt credential file
         working-directory: ./dynatrace-repo
         run: |
-          STAGE="${{ github.event.inputs.stage }}"
-          OE="${{ github.event.inputs.oe }}"
-          APPID="${{ github.event.inputs.oe }}"
+          EXPORT STAGE="${{ github.event.inputs.stage }}"
+          EXPORT OE="${{ github.event.inputs.oe }}"
+          EXPORT APPID="${{ github.event.inputs.oe }}"
           LABEL="adp-dbx-{$OE}-{$STAGE}" 
           CREDENTIAL="sp-adp-dbx-{$OE}-{$STAGE}-dynatrace.p7m"
 
