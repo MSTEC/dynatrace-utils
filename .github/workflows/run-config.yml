@@ -45,11 +45,11 @@ jobs:
       - name: encrypt credential file
         working-directory: ./dynatrace-repo
         run: |
-          export STAGE="${{ github.event.inputs.stage }}"
-          export OE="${{ github.event.inputs.oe }}"
-          export APPID="${{ github.event.inputs.appId }}"
-          export LABEL="adp-dbx-${OE}-${STAGE}" 
-          export CREDENTIAL="sp-adp-dbx-${OE}-${STAGE}-dynatrace.p7m"
+          STAGE="${{ github.event.inputs.stage }}"
+          OE="${{ github.event.inputs.oe }}"
+          APPID="${{ github.event.inputs.appId }}"
+          LABEL="adp-dbx-${OE}-${STAGE}" 
+          CREDENTIAL="sp-adp-dbx-${OE}-${STAGE}-dynatrace.p7m"
 
           echo "label: $LABEL"
           echo "APPID: $APPID"
@@ -72,7 +72,11 @@ jobs:
           # Replace placeholders with variables
           echo "$(yq --version)"
           
-          sed -i "s/<LABEL>/${LABEL}/g; s/<APPID>/${APPID}/g" "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" > "${GITHUB_WORKSPACE}/templates/azure/azure_subscription_modified.yml"
+          sed -i "s/<LABEL>/${LABEL}/g" "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" > "${GITHUB_WORKSPACE}/templates/azure/azure_subscription_modified.yml"
+
+          echo "azure_subscription.yml template Modified"
+          cat "${GITHUB_WORKSPACE}/templates/azure/azure_subscription_modified.yml"
+
           #sed -i "s/value_to_replace1/${NEW_VALUE1}/g; s/value_to_replace2/${NEW_VALUE2}/g" config.yml
           #sed -i "s/value_to_replace1/${NEW_VALUE1}/g; s/value_to_replace2/${NEW_VALUE2}/g" config.yml
 
