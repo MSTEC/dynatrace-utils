@@ -56,7 +56,8 @@ jobs:
           
           jq --arg LABEL "$LABEL" \
             --arg CREDENTIAL "$CREDENTIAL" \
-            --arg APPID "$APPID" ' (.. | select(tag == "!!str")) |= sub("<LABEL>", $LABEL) | (.. | select(tag == "!!str")) |= sub("<CREDENTIAL>", $CREDENTIAL) | (.. | select(tag == "!!str")) |= sub("<APPID>", $APPID)' "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" > "${GITHUB_WORKSPACE}/templates/azure/azure_subscription_modified.yml"
+            --arg APPID "$APPID" \ 
+            ' (.. | select(tag == "!!str")) |= sub("<LABEL>", $LABEL) | (.. | select(tag == "!!str")) |= sub("<CREDENTIAL>", $CREDENTIAL) | (.. | select(tag == "!!str")) |= sub("<APPID>", $APPID)' "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" > "${GITHUB_WORKSPACE}/templates/azure/azure_subscription_modified.yml"
           
           echo "Workspace: ${GITHUB_WORKSPACE}"
 
