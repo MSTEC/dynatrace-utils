@@ -54,10 +54,11 @@ jobs:
           openssl smime -encrypt -in "${GITHUB_WORKSPACE}/templates/credentials/credential.yml" -aes256 -out "${GITHUB_WORKSPACE}/dynatrace-repo/credentials/file2.p7m" -outform pem "${GITHUB_WORKSPACE}/certs/prod-cac_base64.cer"
           echo "copy subcription configuration"
           
-          jq --arg LABEL "$LABEL" \
-            --arg CREDENTIAL "$CREDENTIAL" \
-            --arg APPID "$APPID" \ 
-            e ' (.. | select(tag == "!!str")) |= sub("<LABEL>", $LABEL) | (.. | select(tag == "!!str")) |= sub("<CREDENTIAL>", $CREDENTIAL) | (.. | select(tag == "!!str")) |= sub("<APPID>", $APPID)' "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" > "${GITHUB_WORKSPACE}/templates/azure/azure_subscription_modified.yml"
+          jq --arg LABEL '$LABEL' e ' (.. | select(tag == "!!str")) |= sub("<LABEL>", "$LABEL") ' "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" > "${GITHUB_WORKSPACE}/templates/azure/azure_subscription_modified.yml"
+          
+            #--arg CREDENTIAL '$CREDENTIAL' \
+            #--arg APPID '$APPID' \ 
+            #| (.. | select(tag == "!!str")) |= sub("<CREDENTIAL>", $CREDENTIAL) | (.. | select(tag == "!!str")) |= sub("<APPID>", $APPID)' "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" > "${GITHUB_WORKSPACE}/templates/azure/azure_subscription_modified.yml"
           
           echo "Workspace: ${GITHUB_WORKSPACE}"
 
