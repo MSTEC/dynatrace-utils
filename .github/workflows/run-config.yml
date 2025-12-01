@@ -55,8 +55,8 @@ jobs:
           echo "PWD : $PWD"   
           echo "GITHUB_WORKSPACE : ${GITHUB_WORKSPACE}"   
 
-          cat "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml\n" | xargs echo
-          cat "${GITHUB_WORKSPACE}/templates/credentials/credential.yml\n" | xargs echo
+          cat "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" | xargs echo
+          cat "${GITHUB_WORKSPACE}/templates/credentials/credential.yml" | xargs echo
 
           echo "encrypt credential"
 
