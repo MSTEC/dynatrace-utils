@@ -49,7 +49,7 @@ jobs:
           LABEL="adp-dbx-{$OE}-{$STAGE}" 
           CREDENTIAL="sp-adp-dbx-{$OE}-{$STAGE}-dynatrace.p7m"
 
-          echo "PWD : $PWD"   # e.g /some/work/dir
+          echo "PWD : $PWD"   
           echo "encrypt credential"
           openssl smime -encrypt -in "${GITHUB_WORKSPACE}/templates/credentials/credential.yml" -aes256 -out "${GITHUB_WORKSPACE}/dynatrace-repo/credentials/file2.p7m" -outform pem "${GITHUB_WORKSPACE}/certs/prod-cac_base64.cer"
           echo "copy subcription configuration"
@@ -57,7 +57,7 @@ jobs:
           jq --arg LABEL "$LABEL" \
             CREDENTIAL "$CREDENTIAL" \
             APPID "$APPID" \
-            e ' (.. | select(tag == "!!str")) |= sub("<LABEL>", env.LABEL) | (.. | select(tag == "!!str")) |= sub("<CREDENTIAL>", env.CREDENTIAL) | (.. | select(tag == "!!str")) |= sub("<APPID>", env.APPID)' "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" > "${GITHUB_WORKSPACE}/templates/azure/azure_subscription_modified.yml"
+            e ' (.. | select(tag == "!!str")) |= sub("<LABEL>", $LABEL) | (.. | select(tag == "!!str")) |= sub("<CREDENTIAL>", $CREDENTIAL) | (.. | select(tag == "!!str")) |= sub("<APPID>", $APPID)' "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" > "${GITHUB_WORKSPACE}/templates/azure/azure_subscription_modified.yml"
           
           echo "Workspace: ${GITHUB_WORKSPACE}"
 
@@ -69,7 +69,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.DEST_REPO_TOKEN }}
         working-directory: ./dynatrace-repo
         run: |
-          echo "PWD : $PWD"   # e.g /some/work/dir
+          echo "PWD : $PWD"   
           git config user.name "Github Actions Bot"
           git config user.email "<none>"
           git add ./credentials/file.p7m
