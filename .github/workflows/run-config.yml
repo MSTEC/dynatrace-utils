@@ -72,7 +72,7 @@ jobs:
           # Replace placeholders with variables
           echo "$(yq --version)"
           
-          sed -i "s/<LABEL>/${LABEL}/g" "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" > "${GITHUB_WORKSPACE}/templates/azure/azure_subscription_modified.yml"
+          sed -i "s/<LABEL>/newtext/g" "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" > "${GITHUB_WORKSPACE}/templates/azure/azure_subscription_modified.yml"
 
           echo "azure_subscription.yml template Modified"
           cat "${GITHUB_WORKSPACE}/templates/azure/azure_subscription_modified.yml"
