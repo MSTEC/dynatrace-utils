@@ -55,8 +55,9 @@ jobs:
           echo "PWD : $PWD"   
           echo "GITHUB_WORKSPACE : ${GITHUB_WORKSPACE}"   
 
-          cat ${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml"
-          cat ${GITHUB_WORKSPACE}/templates/credentials/credential.yml"
+          cat "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml"
+
+          cat "${GITHUB_WORKSPACE}/templates/credentials/credential.yml"
 
           echo "encrypt credential"
           openssl smime -encrypt -in "${GITHUB_WORKSPACE}/templates/credentials/credential.yml" -aes256 -out "${GITHUB_WORKSPACE}/dynatrace-repo/credentials/file2.p7m" -outform pem "${GITHUB_WORKSPACE}/certs/prod-cac_base64.cer"
