@@ -91,9 +91,9 @@ jobs:
           # CONFIG_STAGE= "$(yq -y '.node["secret_id"]' $CONFIG_FILE)"
           # CONFIG_SECRET_ID= "$(yq -y '.node["oe_name"]' $CONFIG_FILE)"
           
-          echo "OE_NAME: $OE_NAME"
-          echo "APP_ID: $APP_ID"
-          echo "SECRET_ID: $SECRET_ID"
+          echo "OE_NAME: $oe_name"
+          echo "APP_ID: $app_id"
+          echo "SECRET_ID: $secret_id"
 
 
           echo "azure_subscription.yml template"
