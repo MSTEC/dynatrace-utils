@@ -83,7 +83,8 @@ jobs:
           set -eu
           CONFIG_FILE="${GITHUB_WORKSPACE}/config/${OE}/${STAGE}/config.yml"
           echo "config file: $CONFIG_FILE"
-
+          
+          yq -o=shell $CONFIG_FILE
           CONFIG_OE_NAME= "$(yq '.oe_name' $CONFIG_FILE)"
           CONFIG_APP_ID= "$(yq '.app_id' $CONFIG_FILE)"
           CONFIG_STAGE= "$(yq '.secret_id' $CONFIG_FILE)"
@@ -94,9 +95,9 @@ jobs:
           # CONFIG_STAGE= "$(yq -y '.node["secret_id"]' $CONFIG_FILE)"
           # CONFIG_SECRET_ID= "$(yq -y '.node["oe_name"]' $CONFIG_FILE)"
           
-          echo "CONFIG_OE_NAME: $CONFIG_OE_NAME"
-          echo "CONFIG_APP_ID: $CONFIG_APP_ID"
-          echo "CONFIG_SECRET_ID: $CONFIG_SECRET_ID"
+          echo "OE_NAME: $OE_NAME"
+          echo "APP_ID: $APP_ID"
+          echo "SECRET_ID: $SECRET_ID"
 
 
           echo "azure_subscription.yml template"
