@@ -42,7 +42,7 @@ jobs:
       - name: GH CLI login
         shell: bash
         run: |
-          gh auth login -h github.developer.allianz.io --with-token <<< "${{ secrets.DEST_REPO_TOKEN }}"
+          gh auth login -h github.com --with-token <<< "${{ secrets.DEST_REPO_TOKEN }}"
           gh auth status
 
       # - name: Azure Login
