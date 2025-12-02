@@ -84,7 +84,7 @@ jobs:
           CONFIG_FILE="${GITHUB_WORKSPACE}/config/${OE}/${STAGE}/config.yml"
           echo "config file: $CONFIG_FILE"
           
-          yq -o=shell $CONFIG_FILE
+          yq -o=shell $CONFIG_FILE | bash
           
           # CONFIG_OE_NAME= "$(yq -y '.node["oe_name"]' $CONFIG_FILE)"
           # CONFIG_APP_ID= "$(yq -y '.node["app_id"]' $CONFIG_FILE)"
