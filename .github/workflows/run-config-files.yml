@@ -81,7 +81,7 @@ jobs:
 
           # get variables from config
           set -eu
-          CONFIG_FILE="${GITHUB_WORKSPACE}/config/${OE}/${STAGE}/config.yaml"
+          CONFIG_FILE="${GITHUB_WORKSPACE}/config/${OE}/${STAGE}/config.yml"
           echo "config file: $CONFIG_FILE"
 
           CONFIG_OE_NAME= $(yq '.oe_name' $CONFIG_FILE)
