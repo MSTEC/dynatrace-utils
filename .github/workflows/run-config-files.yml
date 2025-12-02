@@ -1,0 +1,132 @@
+name: run-config-woth-files
+
+on: 
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: 'Target stage'
+        required: true
+        type: choice
+        options:
+          - 'pre-prod'
+          - 'prod'
+      oe:
+        description: 'OE abbrevation'
+        required: true
+        type: string
+        default: "oe"
+      appId:
+        description: 'AppId of the dynatrace service principal'
+        required: true
+        type: string
+        default: "00000000-0000-0000-0000-000000000000"
+      target_environment:
+        description: 'Target environment'
+        required: true
+        type: string
+        default: "crux"
+
+permissions:
+  contents: read
+  id-token: write
+  
+jobs:
+  run-configuration:
+    environment: 
+      name: dynatrace-rollout
+    runs-on:     
+    - self-hosted
+    - linux
+
+    steps:
+
+      - name: GH CLI login
+        shell: bash
+        run: |
+          gh auth login -h github.developer.allianz.io --with-token <<< "${{ secrets.DEST_REPO_TOKEN }}"
+          gh auth status
+
+      # - name: Azure Login
+      #   uses: azure/login@v2
+      #   with:
+      #     client-id: ${{ vars.ARM_CLIENT_ID }}
+      #     tenant-id: ${{ vars.ARM_TENANT_ID }}
+      #     subscription-id: ${{ vars.ARM_SUBSCRIPTION_ID }}
+  
+      - name: Checkout repository dynatrace-utils
+        uses: actions/checkout@v4
+
+      - name: Checkout repository dynatrace
+        uses: actions/checkout@v4
+        with:
+          repository: "MSTEC/dynatrace"
+          token: ${{ secrets.DEST_REPO_TOKEN }}
+          path: dynatrace-repo
+        
+      - name: encrypt credential file
+        working-directory: ./dynatrace-repo
+        run: |
+          STAGE="${{ github.event.inputs.stage }}"
+          OE="${{ github.event.inputs.oe }}"
+          APPID="${{ github.event.inputs.appId }}"
+          LABEL="adp-dbx-${OE}-${STAGE}" 
+          CREDENTIAL="sp-adp-dbx-${OE}-${STAGE}-dynatrace"
+          #SECRET=$(az keyvault secret show --name "33fcc3ac-6a88-485f-a126-5ba52efb89cb" --vault-name "adb-crux-prod-kv" --query "value")
+          
+          echo "label: $LABEL"
+          echo "APPID: $APPID"
+          echo "CREDENTIAL: $CREDENTIAL"
+          echo "PWD : $PWD"   
+          echo "GITHUB_WORKSPACE : ${GITHUB_WORKSPACE}"   
+          echo "Secret: $SECRET"
+
+          # get variables from config
+          set -eu
+          CONFIG_FILE="${GITHUB_WORKSPACE}/config/${STAGE}/${OE}/config.yaml"
+          echo "config file: $CONFIG_FILE"
+
+          CONFIG_OE_NAME= $(yq -y '.node["oe_name"]' $CONFIG_FILE)
+          CONFIG_APP_ID= $(yq -y '.node["app_id"]' $CONFIG_FILE)
+          CONFIG_STAGE= $(yq -y '.node["secret_id"]' $CONFIG_FILE)
+          CONFIG_SECRET_ID= $(yq -y '.node["oe_name"]' $CONFIG_FILE)
+          
+          echo "CONFIG_OE_NAME: $CONFIG_OE_NAME"
+          echo "CONFIG_APP_ID: $CONFIG_APP_ID"
+          echo "CONFIG_SECRET_ID: $CONFIG_SECRET_ID"
+
+
+          echo "azure_subscription.yml template"
+          cat "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml"
+          echo "credential.yml template"
+          cat "${GITHUB_WORKSPACE}/templates/credentials/credential.yml"
+          echo ""
+
+          echo "encrypt credential"
+          sed "s/<SECRET>/${SECRET}/g" "${GITHUB_WORKSPACE}/templates/credentials/credential.yml" > "${GITHUB_WORKSPACE}/templates/credentials/credential_updated.yml"
+          cat "${GITHUB_WORKSPACE}/templates/credentials/credential_updated.yml"
+          openssl smime -encrypt -in "${GITHUB_WORKSPACE}/templates/credentials/credential_updated.yml" -aes256 -out "${GITHUB_WORKSPACE}/dynatrace-repo/credentials/dynatrace-service-principal.p7m" -outform pem "${GITHUB_WORKSPACE}/certs/prod-cac_base64.cer"
+          rm "${GITHUB_WORKSPACE}/templates/credentials/credential_updated.yml"
+          echo "Encryped credential:"  
+          cat "${GITHUB_WORKSPACE}/dynatrace-repo/credentials/dynatrace-service-principal.p7m"
+          echo ""
+
+          # Replace placeholders with variables"
+          echo "copy subcription configuration"
+          sed "s/<LABEL>/${LABEL}/g; s/<APPID>/${APPID}/g; s/<CREDENTIAL>/${CREDENTIAL}/g" "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" > "${GITHUB_WORKSPACE}/dynatrace-repo/azure/azure_subscription.yml"
+
+      - name: copy credential file to dynatrace repo
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEST_REPO_TOKEN }}
+        working-directory: ./dynatrace-repo
+        run: |
+          echo "PWD : $PWD"   
+          git config user.name "Github Actions Bot"
+          git config user.email "<none>"
+          git add ./credentials/dynatrace-service-principal.p7m
+          git add ./azure/azure_subscription.yml
+          git commit -m "Add encrypted credential file"
+          git push origin HEAD:main
+
+          echo $dir
+          ls

@@ -42,6 +42,15 @@ jobs:
           token: ${{ secrets.DEST_REPO_TOKEN }}
           path: dynatrace-repo
         
+
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.ARM_CLIENT_ID }}
+          tenant-id: ${{ vars.ARM_TENANT_ID }}
+          subscription-id: ${{ vars.ARM_SUBSCRIPTION_ID }}
+
       - name: encrypt credential file
         working-directory: ./dynatrace-repo
         run: |
@@ -56,6 +65,9 @@ jobs:
           echo "CREDENTIAL: $CREDENTIAL"
           echo "PWD : $PWD"   
           echo "GITHUB_WORKSPACE : ${GITHUB_WORKSPACE}"   
+
+          VALUE= $(az keyvault secret show --name "33fcc3ac-6a88-485f-a126-5ba52efb89cb" --vault-name "adb-crux-prod-kv" --query "value")
+          echo "Value = ${VALUE}"
 
           echo "azure_subscription.yml template"
           cat "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml"
