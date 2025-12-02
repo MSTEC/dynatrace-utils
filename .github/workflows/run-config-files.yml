@@ -84,15 +84,15 @@ jobs:
           CONFIG_FILE="${GITHUB_WORKSPACE}/config/${OE}/${STAGE}/config.yml"
           echo "config file: $CONFIG_FILE"
 
-          CONFIG_OE_NAME= $(yq '.oe_name' $CONFIG_FILE)
-          CONFIG_APP_ID= $(yq '.app_id' $CONFIG_FILE)
-          CONFIG_STAGE= $(yq '.secret_id' $CONFIG_FILE)
-          CONFIG_SECRET_ID= $(yq '.oe_name' $CONFIG_FILE)
+          CONFIG_OE_NAME= "$(yq '.oe_name' $CONFIG_FILE)"
+          CONFIG_APP_ID= "$(yq '.app_id' $CONFIG_FILE)"
+          CONFIG_STAGE= "$(yq '.secret_id' $CONFIG_FILE)"
+          CONFIG_SECRET_ID= "$(yq '.oe_name' $CONFIG_FILE)"
 
-          # CONFIG_OE_NAME= $(yq -y '.node["oe_name"]' $CONFIG_FILE)
-          # CONFIG_APP_ID= $(yq -y '.node["app_id"]' $CONFIG_FILE)
-          # CONFIG_STAGE= $(yq -y '.node["secret_id"]' $CONFIG_FILE)
-          # CONFIG_SECRET_ID= $(yq -y '.node["oe_name"]' $CONFIG_FILE)
+          # CONFIG_OE_NAME= "$(yq -y '.node["oe_name"]' $CONFIG_FILE)"
+          # CONFIG_APP_ID= "$(yq -y '.node["app_id"]' $CONFIG_FILE)"
+          # CONFIG_STAGE= "$(yq -y '.node["secret_id"]' $CONFIG_FILE)"
+          # CONFIG_SECRET_ID= "$(yq -y '.node["oe_name"]' $CONFIG_FILE)"
           
           echo "CONFIG_OE_NAME: $CONFIG_OE_NAME"
           echo "CONFIG_APP_ID: $CONFIG_APP_ID"
