@@ -14,7 +14,7 @@ on:
         description: 'OE abbrevation'
         required: true
         type: string
-        default: "oe"
+        default: "crux"
       appId:
         description: 'AppId of the dynatrace service principal'
         required: true
@@ -81,7 +81,7 @@ jobs:
 
           # get variables from config
           set -eu
-          CONFIG_FILE="${GITHUB_WORKSPACE}/config/${STAGE}/${OE}/config.yaml"
+          CONFIG_FILE="${GITHUB_WORKSPACE}/config/${OE}/${STAGE}/config.yaml"
           echo "config file: $CONFIG_FILE"
 
           CONFIG_OE_NAME= $(yq '.oe_name' $CONFIG_FILE)
