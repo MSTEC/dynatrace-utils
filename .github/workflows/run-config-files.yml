@@ -85,11 +85,7 @@ jobs:
           echo "config file: $CONFIG_FILE"
           
           yq -o=shell $CONFIG_FILE
-          CONFIG_OE_NAME= "$(yq '.oe_name' $CONFIG_FILE)"
-          CONFIG_APP_ID= "$(yq '.app_id' $CONFIG_FILE)"
-          CONFIG_STAGE= "$(yq '.secret_id' $CONFIG_FILE)"
-          CONFIG_SECRET_ID= "$(yq '.oe_name' $CONFIG_FILE)"
-
+          
           # CONFIG_OE_NAME= "$(yq -y '.node["oe_name"]' $CONFIG_FILE)"
           # CONFIG_APP_ID= "$(yq -y '.node["app_id"]' $CONFIG_FILE)"
           # CONFIG_STAGE= "$(yq -y '.node["secret_id"]' $CONFIG_FILE)"
