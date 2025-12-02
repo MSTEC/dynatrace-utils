@@ -1,4 +1,4 @@
-name: run-config-woth-files
+name: run-config-with-files
 
 on: 
   workflow_dispatch:
@@ -35,8 +35,7 @@ jobs:
     environment: 
       name: dynatrace-rollout
     runs-on:     
-    - self-hosted
-    - linux
+    - ubuntu-latest
 
     steps:
 
