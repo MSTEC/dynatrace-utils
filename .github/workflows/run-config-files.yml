@@ -80,7 +80,7 @@ jobs:
           echo "Secret: $SECRET"
 
           # get variables from config
-          set -eu
+          
           CONFIG_FILE="${GITHUB_WORKSPACE}/config/${OE}/${STAGE}/config.yml"
           echo "config file: $CONFIG_FILE"
           
