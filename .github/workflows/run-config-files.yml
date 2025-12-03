@@ -1,4 +1,4 @@
-name: run-config-with-files
+name: run-dynatrace-configuration
 
 on: 
   workflow_dispatch:
@@ -45,39 +45,46 @@ jobs:
       - name: Checkout repository dynatrace-utils
         uses: actions/checkout@v4
 
+      - name: Read config file
+        run: |
+            STAGE="${{ github.event.inputs.stage }}"
+            OE="${{ github.event.inputs.oe }}"
+            APPID="${{ github.event.inputs.appId }}"
+            STAGE="${{ github.event.inputs.stage }}"
+            OE="${{ github.event.inputs.oe }}"
+            CONFIG_FILE="${GITHUB_WORKSPACE}/config/${OE}/${STAGE}/config.yml"
+            
+            # get variables from config
+            # output vars: oe_name, label, app_id, secret_id
+            eval $(yq -o=shell $CONFIG_FILE) 
+          
+            # Debugging output TODO: remove
+            echo "PWD : $PWD"   
+            echo "GITHUB_WORKSPACE : ${GITHUB_WORKSPACE}"   
+            echo "config file: $CONFIG_FILE"
+            
+            echo "Workflow parameters:"
+            echo "- oe_name: $oe_name"
+            echo "- stage: $STAGE"
+            echo "Config file values:"
+            echo "- dynatrace_repo: $dynatrace_repo"
+            echo "- label: $label"
+            echo "- app_id: $app_id"
+            echo "- secret_id: $secret_id"
+            
+            # add dynatrace repo to github env
+            echo "DYNATRACE_REPO=$dynatrace_repo" >> $GITHUB_ENV
+
       - name: Checkout repository dynatrace
         uses: actions/checkout@v4
         with:
-          repository: "MSTEC/dynatrace"
+          repository: ${{ env.DYNATRACE_REPO }}
           token: ${{ secrets.DEST_REPO_TOKEN }}
           path: dynatrace-repo
         
       - name: Generate dynatrace configuration files
         working-directory: ./dynatrace-repo
-        run: |
-          STAGE="${{ github.event.inputs.stage }}"
-          OE="${{ github.event.inputs.oe }}"
-          CONFIG_FILE="${GITHUB_WORKSPACE}/config/${OE}/${STAGE}/config.yml"
-          
-          # get variables from config
-          # output vars: oe_name, label, app_id, secret_id
-          eval $(yq -o=shell $CONFIG_FILE) 
-        
-          # Debugging output TODO: remove
-          echo "PWD : $PWD"   
-          echo "GITHUB_WORKSPACE : ${GITHUB_WORKSPACE}"   
-          echo "config file: $CONFIG_FILE"
-          
-          echo "Workflow parameters:"
-          echo "- oe_name: $oe_name"
-          echo "- stage: $stage"
-          echo "Config file values:"
-          echo "- label: $label"
-          echo "- app_id: $app_id"
-          echo "- secret_id: $secret_id"
-          echo "calculated values:"
-          echo "- label: $LABEL"
-          
+        run: |       
           # get secret
           #SECRET=$(az keyvault secret show --name "$secret_id" --vault-name "${{ vars.KEY_VAULT_NAME }}" --query "value")
           

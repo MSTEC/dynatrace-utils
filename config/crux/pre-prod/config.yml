@@ -1,4 +1,5 @@
-oe_name:    'crux'
-label:      'adp-dbx-crux-pre-prod'
-app_id:     '00000000-0000-0000-0000-000000000000'
-secret_id:  "00000000-0000-0000-0000-000000000000"
+oe_name:        'crux'
+dynatrace_repo: 'MSTEC/dynatrace'
+label:          'adp-dbx-crux-pre-prod'
+app_id:         '00000000-0000-0000-0000-000000000000'
+secret_id:      "00000000-0000-0000-0000-000000000000"
