@@ -1,0 +1,89 @@
+name: "Reusable Rollout Workflow"
+on:
+  workflow_call:
+    inputs:
+      target_environment:
+        required: true
+        type: string
+    secrets:
+      arm_client_id:
+        required: true
+      arm_client_secret:
+        required: false
+      databricks_account_id:
+        required: true
+      databricks_admin_client_id:
+        required: false
+      gh_app_private_key:
+        required: true
+
+env:
+  # https://developer.hashicorp.com/terraform/cli/config/environment-variables
+  # TF_CLI_ARGS: "-lock-timeout=10s"
+  TF_CLI_ARGS: ""
+  TF_IN_AUTOMATION: "nonempty"
+  DBX_INFRA_ROLLOUT_PATH: "dbx-infra-rollout-code"
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+# fun with booleans
+# https://github.com/actions/runner/issues/1483#issuecomment-2157791523
+
+jobs:
+  terraform:
+    name: Provisioning ${{ fromJSON(inputs.target_environment).oe_name }}-${{ fromJSON(inputs.target_environment).stage }}-${{ fromJSON(inputs.target_environment).instance }}
+
+    # github environment
+    environment:
+      name: ${{ fromJSON(inputs.target_environment).github }}
+
+    runs-on:
+      - self-hosted
+      - linux
+
+    steps:
+      # Checkout run's ref to for adp-actions
+      - name: Checkout action
+        uses: actions/checkout@v5
+
+      - name: Generate a token
+        id: gh_token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.GH_APP_REPO_WORKFLOWS_APP_ID }}
+          private-key: ${{ secrets.gh_app_private_key }}
+          owner: adp-databricks
+
+      - name: "Checkout"
+        uses: actions/checkout@v5
+        with:
+          repository: adp-databricks/dbx-infra-rollout
+          ref: ${{ fromJSON(inputs.target_environment).module['dbx-infra-rollout'].version }}
+          token: ${{ steps.gh_token.outputs.token }}
+          path: ${{ env.DBX_INFRA_ROLLOUT_PATH }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.12.2
+
+      - name: "Run terraform"
+        id: terraform
+        uses: ./.github/workflows/actions/terraform/
+        with:
+          target_environment: ${{ inputs.target_environment }}
+
+          terraform_working_dir: ${{ env.DBX_INFRA_ROLLOUT_PATH }}/code/provisioning
+          arm_client_id: ${{ vars.ARM_CLIENT_ID }}
+          arm_tenant_id: ${{ vars.ARM_TENANT_ID }}
+          arm_subscription_id: ${{ vars.ARM_SUBSCRIPTION_ID }}
+          arm_use_oidc: 'true'
+
+          gh_token: ${{ steps.gh_token.outputs.token }}
+
+    outputs:
+      terraform_outputs: ${{ steps.terraform.outputs.outputs_json }}
+      has_workspaces: ${{ steps.terraform.outputs.has_workspaces }}

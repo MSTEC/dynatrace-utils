@@ -15,16 +15,6 @@ on:
         required: true
         type: string
         default: "crux"
-      appId:
-        description: 'AppId of the dynatrace service principal'
-        required: true
-        type: string
-        default: "00000000-0000-0000-0000-000000000000"
-      target_environment:
-        description: 'Target environment'
-        required: true
-        type: string
-        default: "crux"
 
 permissions:
   contents: read
@@ -67,34 +57,31 @@ jobs:
         run: |
           STAGE="${{ github.event.inputs.stage }}"
           OE="${{ github.event.inputs.oe }}"
-          APPID="${{ github.event.inputs.appId }}"
           LABEL="adp-dbx-${OE}-${STAGE}" 
           CREDENTIAL="sp-adp-dbx-${OE}-${STAGE}-dynatrace"
-          #SECRET=$(az keyvault secret show --name "33fcc3ac-6a88-485f-a126-5ba52efb89cb" --vault-name "adb-crux-prod-kv" --query "value")
+          CONFIG_FILE="${GITHUB_WORKSPACE}/config/${OE}/${STAGE}/config.yml"
+          eval $(yq -o=shell $CONFIG_FILE) # output vars: oe_name, app_id, secret_id
+          echo "oe_name: $oe_name"
+          echo "app_id: $app_id"
+          echo "secret_id: $secret_id"
+
+          #SECRET=$(az keyvault secret show --name "$secret_id" --vault-name "${{ vars.KEY_VAULT_NAME }}" --query "value")
           
-          echo "label: $LABEL"
-          echo "APPID: $APPID"
-          echo "CREDENTIAL: $CREDENTIAL"
           echo "PWD : $PWD"   
           echo "GITHUB_WORKSPACE : ${GITHUB_WORKSPACE}"   
-          echo "Secret: $SECRET"
+          echo "label: $LABEL"
+          echo "APPID: $app_id"
+          echo "CREDENTIAL: $CREDENTIAL"
+          echo "Secret: $secret_id"
 
           # get variables from config
-          CONFIG_FILE="${GITHUB_WORKSPACE}/config/${OE}/${STAGE}/config.yml"
           echo "config file: $CONFIG_FILE"
-          
-          eval $(yq -o=shell $CONFIG_FILE)
-                 
-          echo "OE_NAME: $oe_name"
-          echo "APP_ID: $app_id"
-          echo "SECRET_ID: $secret_id"
 
-
-          echo "azure_subscription.yml template"
-          cat "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml"
-          echo "credential.yml template"
-          cat "${GITHUB_WORKSPACE}/templates/credentials/credential.yml"
-          echo ""
+          #echo "azure_subscription.yml template"
+          #cat "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml"
+          #echo "credential.yml template"
+          #cat "${GITHUB_WORKSPACE}/templates/credentials/credential.yml"
+          #echo ""
 
           echo "encrypt credential"
           sed "s/<SECRET>/${SECRET}/g" "${GITHUB_WORKSPACE}/templates/credentials/credential.yml" > "${GITHUB_WORKSPACE}/templates/credentials/credential_updated.yml"

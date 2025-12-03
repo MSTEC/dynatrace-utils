@@ -1,0 +1,93 @@
+name: "Rollout Workflow"
+
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: 'Target stage'
+        required: true
+        type: choice
+        options:
+          - 'pre-prod'
+          - 'prod'
+#   push:
+#     branches:
+#       - main
+#     paths:
+#       - "!**.md"
+#       - "config/**"
+
+#   pull_request:
+#     branches:
+#       - main
+#     paths:
+#       - "!**.md"
+#       - "config/**"
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+env:
+  TF_CLI_ARGS: ""
+  TF_IN_AUTOMATION: "nonempty"
+
+jobs:
+  prep_env_list:
+    name: Prepare environment list
+    runs-on:
+      - self-hosted
+      - linux
+    steps:
+      - name: "Setup - Code Checkout"
+        uses: actions/checkout@v5
+
+      - name: Prep changed config files
+        uses: dorny/paths-filter@v3
+        id: prep_changed_files
+        with:
+          filters: |
+            config:
+              - 'config/**'
+          list-files: json
+
+      - name: List environments
+        id: list_envs
+        shell: bash
+        working-directory: .
+        env:
+          CHANGED_CONFIG_FILES: ${{ steps.prep_changed_files.outputs.config_files }}
+        run: ${GITHUB_WORKSPACE}/.github/workflows/scripts/build-matrix.sh
+    outputs:
+      target_environment_list: ${{ steps.list_envs.outputs.list }}
+      target_environment_list_length: ${{ steps.list_envs.outputs.list_len }}
+
+  rollout:
+    name: Rollout ${{ matrix.target_environment.oe_name }}-${{ matrix.target_environment.stage }}-${{ matrix.target_environment.instance }}
+    if: ${{ needs.prep_env_list.outputs.target_environment_list_length > 0 }}
+    needs: ["prep_env_list"]
+    concurrency:
+      group: ${{ matrix.target_environment.oe_name }}-${{ matrix.target_environment.stage }}-${{ matrix.target_environment.instance }}
+      cancel-in-progress: false
+
+    uses: ./.github/workflows/reusable-rollout.yaml
+    with:
+      target_environment: ${{ toJSON(matrix.target_environment) }}
+    secrets:
+      arm_client_id: ${{ secrets.ARM_CLIENT_ID }}
+      databricks_account_id: ${{ secrets.DATABRICKS_ACCOUNT_ID }}
+      databricks_admin_client_id: ${{ secrets.DATABRICKS_ADMIN_CLIENT_ID }}
+      gh_app_private_key: ${{ secrets.GH_APP_REPO_WORKFLOWS_PRIVATE_KEY }}
+    # secrets: inherit
+
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        target_environment: ${{ fromJSON(needs.prep_env_list.outputs.target_environment_list) }}
