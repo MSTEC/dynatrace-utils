@@ -52,51 +52,52 @@ jobs:
           token: ${{ secrets.DEST_REPO_TOKEN }}
           path: dynatrace-repo
         
-      - name: encrypt credential file
+      - name: Generate dynatrace configuration files
         working-directory: ./dynatrace-repo
         run: |
           STAGE="${{ github.event.inputs.stage }}"
           OE="${{ github.event.inputs.oe }}"
-          LABEL="adp-dbx-${OE}-${STAGE}" 
-          CREDENTIAL="sp-adp-dbx-${OE}-${STAGE}-dynatrace"
           CONFIG_FILE="${GITHUB_WORKSPACE}/config/${OE}/${STAGE}/config.yml"
-          eval $(yq -o=shell $CONFIG_FILE) # output vars: oe_name, app_id, secret_id
-          echo "oe_name: $oe_name"
-          echo "app_id: $app_id"
-          echo "secret_id: $secret_id"
-
-          #SECRET=$(az keyvault secret show --name "$secret_id" --vault-name "${{ vars.KEY_VAULT_NAME }}" --query "value")
           
+          # get variables from config
+          # output vars: oe_name, label, app_id, secret_id
+          eval $(yq -o=shell $CONFIG_FILE) 
+        
+          # Debugging output TODO: remove
           echo "PWD : $PWD"   
           echo "GITHUB_WORKSPACE : ${GITHUB_WORKSPACE}"   
-          echo "label: $LABEL"
-          echo "APPID: $app_id"
-          echo "CREDENTIAL: $CREDENTIAL"
-          echo "Secret: $secret_id"
-
-          # get variables from config
           echo "config file: $CONFIG_FILE"
-
-          #echo "azure_subscription.yml template"
-          #cat "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml"
-          #echo "credential.yml template"
-          #cat "${GITHUB_WORKSPACE}/templates/credentials/credential.yml"
-          #echo ""
-
-          echo "encrypt credential"
+          
+          echo "Workflow parameters:"
+          echo "- oe_name: $oe_name"
+          echo "- stage: $stage"
+          echo "Config file values:"
+          echo "- label: $label"
+          echo "- app_id: $app_id"
+          echo "- secret_id: $secret_id"
+          echo "calculated values:"
+          echo "- label: $LABEL"
+          
+          # get secret
+          #SECRET=$(az keyvault secret show --name "$secret_id" --vault-name "${{ vars.KEY_VAULT_NAME }}" --query "value")
+          
+          # replace placeholder with secret value
           sed "s/<SECRET>/${SECRET}/g" "${GITHUB_WORKSPACE}/templates/credentials/credential.yml" > "${GITHUB_WORKSPACE}/templates/credentials/credential_updated.yml"
-          cat "${GITHUB_WORKSPACE}/templates/credentials/credential_updated.yml"
+          
+          #encrypt credential file and copy output file to dynatrace repo
           openssl smime -encrypt -in "${GITHUB_WORKSPACE}/templates/credentials/credential_updated.yml" -aes256 -out "${GITHUB_WORKSPACE}/dynatrace-repo/credentials/dynatrace-service-principal.p7m" -outform pem "${GITHUB_WORKSPACE}/certs/prod-cac_base64.cer"
+          
+          #remove updated credential file
           rm "${GITHUB_WORKSPACE}/templates/credentials/credential_updated.yml"
-          echo "Encryped credential:"  
-          cat "${GITHUB_WORKSPACE}/dynatrace-repo/credentials/dynatrace-service-principal.p7m"
-          echo ""
+          echo "dynatrace-service-principal.p7m: "
+          echo $(cat "${GITHUB_WORKSPACE}/dynatrace-repo/credentials/dynatrace-service-principal.p7m")
+          
+          # Replace placeholders with variables and copy output file to dynatrace repo"
+          sed "s/<LABEL>/${label}/g; s/<APPID>/${APPID}/g" "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" > "${GITHUB_WORKSPACE}/dynatrace-repo/azure/azure_subscription.yml"
+          echo "azure_subscription.yml"
+          echo $(cat "${GITHUB_WORKSPACE}/dynatrace-repo/azure/azure_subscription.yml")
 
-          # Replace placeholders with variables"
-          echo "copy subcription configuration"
-          sed "s/<LABEL>/${LABEL}/g; s/<APPID>/${APPID}/g; s/<CREDENTIAL>/${CREDENTIAL}/g" "${GITHUB_WORKSPACE}/templates/azure/azure_subscription.yml" > "${GITHUB_WORKSPACE}/dynatrace-repo/azure/azure_subscription.yml"
-
-      - name: copy credential file to dynatrace repo
+      - name: commit changes in dynatrace repo
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.DEST_REPO_TOKEN }}
@@ -107,7 +108,7 @@ jobs:
           git config user.email "<none>"
           git add ./credentials/dynatrace-service-principal.p7m
           git add ./azure/azure_subscription.yml
-          git commit -m "Add encrypted credential file"
+          git commit -m "Added configuration azure_subscription.yml and encrypted credential file dynatrace-service-principal.p7m"
           git push origin HEAD:main
 
           echo $dir

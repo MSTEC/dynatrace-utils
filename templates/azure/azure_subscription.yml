@@ -5,7 +5,7 @@
 ##
 
 label: <LABEL>                                       # REQUIRED               string                   Must be unique among all Azure labels in your management zone! Please do not use any hyphens!
-key: '{{ <CREDENTIAL> }}'                        # REQUIRED               credential[string]       See README.md and DT documentation for details.
+key: '{{ dynatrace-service-principal }}'                        # REQUIRED               credential[string]       See README.md and DT documentation for details.
 directoryId: 6e06e42d-6925-47c6-b9e7-9581c7ca302a           # REQUIRED               directoryId[string]      Also referred to as 'Tenant ID'.
 appId: <APPID>                # REQUIRED               appId[string]            Also referred to as 'Client ID'.
 autoTagging: true                                         # REQUIRED               true | false             See README.md and DT documentation for details.
